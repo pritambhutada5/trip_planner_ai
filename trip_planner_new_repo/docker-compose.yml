@@ -23,7 +23,6 @@ services:
     command: streamlit run streamlit_app.py --server.port 8501 --server.address 0.0.0.0 --server.enableCORS false
     ports:
       - "8501:8501"
-    # --- THIS IS THE CRUCIAL FIX ---
     # This tells the frontend to wait for the backend to be healthy before starting
     depends_on:
       backend:
