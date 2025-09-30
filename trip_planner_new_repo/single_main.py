@@ -1,10 +1,16 @@
+import logging
+import logging.config
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
-# Import your router from the other file (we will create this next)
+from logging_config import setup_logging
 from api_routes import router as api_router
+
+
+setup_logging()
+logger = logging.getLogger(__name__)
+
 
 # --- FastAPI App Initialization ---
 app = FastAPI(
@@ -12,14 +18,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# --- CORS Configuration ---
-# This stays in your main app file to apply globally
-origins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:8000",
-]
+# --- Lifespan Events Logging ---
+# Log when the application starts and stops
+@app.on_event("startup")
+async def on_startup():
+    logger.info("FastAPI application is starting up...")
 
+@app.on_event("shutdown")
+async def on_shutdown():
+    logger.info("FastAPI application is shutting down...")
+
+
+# --- CORS Configuration ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,14 +38,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Include the API Router ---
-# This is the crucial change. All routes starting with /api will be handled here.
-app.include_router(api_router, prefix="/api")
 
-# --- Static Files Mount ---
-# This now correctly serves as the fallback for any non-API routes.
-app.mount("/", StaticFiles(directory="dist", html=True), name="static")
+@app.get("/health")
+def read_health():
+    """
+    A simple endpoint that returns a 200 OK status if the API is running.
+    """
+    logger.info("Health check endpoint was accessed.")
+    return {"status": "ok"}
+
+
+app.include_router(api_router, prefix="/api")
+logger.info("API router included with prefix /api.")
 
 
 if __name__ == "__main__":
+    logger.info("Starting Uvicorn server directly for local development.")
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
