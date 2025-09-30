@@ -1,8 +1,9 @@
 import streamlit as st
 import requests
 from datetime import date
+import os
 
-API_URL = "http://backend:8000/api/plan-full-trip"
+API_URL = os.getenv("API_URL", "http://backend:8000/api/plan-full-trip")
 
 # Set the page configuration
 st.set_page_config(page_title="AI Trip Planner", layout="wide", initial_sidebar_state="expanded")
