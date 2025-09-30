@@ -3,7 +3,11 @@ import requests
 from datetime import date
 import os
 
-API_URL = os.getenv("API_URL", "http://backend:8000/api/plan-full-trip")
+BASE_API_URL = os.getenv("API_URL", "http://backend:8000") # Render provides base URL
+API_ENDPOINT_PATH = os.getenv("API_ENDPOINT_PATH", "/api/plan-full-trip")
+
+# Combine them to create the full URL
+API_URL = f"{BASE_API_URL}{API_ENDPOINT_PATH}"
 
 # Set the page configuration
 st.set_page_config(page_title="AI Trip Planner", layout="wide", initial_sidebar_state="expanded")
