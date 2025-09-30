@@ -1,0 +1,34 @@
+services:
+  #---------------- Backend Service (FastAPI) ----------------#
+  - type: web
+    name: trip-planner-backend
+    env: docker
+    repo: https://github.com/pritambhutada5/trip_planner_ai.git
+    # --- THIS IS THE FIX ---
+    # Tell Render to operate from this sub-directory
+    rootDir: trip_planner_new_repo
+    # The start command is now relative to the rootDir
+    startCommand: ./start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # Mark as a secret that you will set in the dashboard
+
+  #---------------- Frontend Service (Streamlit) ----------------#
+  - type: web
+    name: trip-planner-frontend
+    env: docker
+    repo: https://github.com/pritambhutada5/trip_planner_ai.git
+    # --- THIS IS THE FIX ---
+    # Tell Render to operate from this sub-directory for the frontend as well
+    rootDir: trip_planner_new_repo
+    # This start command is also relative to the rootDir
+    startCommand: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: API_URL
+        fromService:
+          type: web
+          name: trip-planner-backend
+          property: url
+      - key: API_ENDPOINT_PATH
+        value: /api/plan-full-trip
